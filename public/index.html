@@ -14,6 +14,8 @@ button{width:100%;padding:13px;border:0;border-radius:10px;background:var(--ac);
 </style></head><body><div class="w">
 <div class="c"><h1>🇯🇵 JLPT N5 Study Guide</h1><div class="m">Access fee: <b>₱100</b> · isang beses lang · 1 device lang</div></div>
 
+<div id="rv" class="c h"><b>⭐ Sabi ng mga bumili</b><div id="rl"></div></div>
+
 <div id="buy">
 <div class="c"><b>1. I-scan at magbayad ng ₱100</b>
 <p class="m">GoTyme / InstaPay — kahit anong bank o e-wallet na may InstaPay.</p><img src="qr.jpg" alt="GoTyme QR"></div>
@@ -50,5 +52,11 @@ async function poll(){const id=L.getItem("rid");if(!id)return;$("buy").classList
  if(d.status==="rejected"){$("wait").classList.add("h");$("rej").classList.remove("h");return}
  if(d.status==="unknown"){L.removeItem("rid");$("buy").classList.remove("h");return}
  $("wait").classList.remove("h");setTimeout(poll,5000)}
+async function reviews(){try{const d=await(await fetch("/api/reviews")).json();if(!d.length)return;
+ const l=$("rl");d.forEach(v=>{const e=document.createElement("div");e.style.cssText="margin-top:12px;padding-top:10px;border-top:1px solid #8884";
+ const s=document.createElement("div");s.style.color="#f5a623";s.textContent="★".repeat(v.rating)+"☆".repeat(5-v.rating);
+ const t=document.createElement("div");t.textContent=v.text;const n=document.createElement("div");n.className="m";n.textContent="— "+v.name;
+ e.append(s,t,n);l.append(e)});$("rv").classList.remove("h")}catch(e){}}
+reviews();
 if(L.getItem("key"))enter(L.getItem("key"),true);poll();
 </script></body></html>
