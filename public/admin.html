@@ -1,1 +1,16 @@
-
+<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex"><title>Admin</title>
+<style>body{font-family:system-ui;padding:14px;max-width:560px;margin:auto}.r{border:1px solid #8885;border-radius:10px;padding:10px;margin:8px 0}
+button{padding:8px 12px;margin:4px 4px 0 0;border-radius:8px;border:0;background:#00b8c8;color:#fff}button.x{background:#d44}input{padding:10px;width:100%;box-sizing:border-box}</style></head>
+<body><h2>Seller Admin</h2><input id="p" type="password" placeholder="Admin password"><button onclick="load()">Load</button><div id="o"></div>
+<script>
+const p=()=>document.getElementById("p").value;
+async function call(a,b={}){return(await fetch("/api/admin/"+a,{method:"POST",body:JSON.stringify({password:p(),...b})})).json()}
+async function act(a,id){await call(a,{id});load()}
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+async function load(){const d=await call("list");const o=document.getElementById("o");
+ if(d.error){o.textContent=d.error;return}
+ o.innerHTML=d.map(r=>`<div class=r><b>${esc(r.name)}</b> · ${esc(r.contact)}<br>Ref: <b>${esc(r.ref)}</b> · ${new Date(r.created).toLocaleString()}<br>Status: ${r.status}${r.key?` · Key: <b>${r.key}</b> · ${r.revoked?"REVOKED":r.bound?"device bound":"not yet used"}`:""}<br>
+ ${r.status=="pending"?`<button onclick="act('approve','${r.id}')">Approve</button><button class=x onclick="act('reject','${r.id}')">Reject</button>`:""}
+ ${r.key?`<button onclick="act('reset','${r.id}')">Reset device</button><button class=x onclick="act('revoke','${r.id}')">Revoke</button>`:""}</div>`).join("")||"Wala pang request."}
+</script></body></html>
