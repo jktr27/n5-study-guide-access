@@ -1,0 +1,62 @@
+<!DOCTYPE html><html lang="fil"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>JLPT N5 Study Guide</title>
+<style>
+:root{--bg:#f4fbfc;--card:#fff;--tx:#1d2330;--mut:#667;--ac:#00b8c8}
+@media(prefers-color-scheme:dark){:root{--bg:#10171a;--card:#192226;--tx:#eef3f4;--mut:#9ab}}
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,sans-serif;background:var(--bg);color:var(--tx);padding:16px;display:flex;justify-content:center}
+.w{max-width:420px;width:100%}.c{background:var(--card);border-radius:16px;padding:18px;margin-bottom:14px;box-shadow:0 1px 6px #0002}
+h1{font-size:22px;margin:4px 0}.m{color:var(--mut);font-size:14px}img{width:100%;border-radius:12px}
+input{width:100%;padding:12px;margin:6px 0;border-radius:10px;border:1px solid #8886;background:transparent;color:inherit;font-size:16px}
+button{width:100%;padding:13px;border:0;border-radius:10px;background:var(--ac);color:#fff;font-size:16px;font-weight:600;margin-top:6px}
+.k{font-size:22px;font-weight:700;letter-spacing:2px;text-align:center;padding:12px;border:2px dashed var(--ac);border-radius:10px;margin:10px 0;user-select:all}
+.e{color:#d33;font-size:14px}.h{display:none}
+</style></head><body><div class="w">
+<div class="c"><h1>🇯🇵 JLPT N5 Study Guide</h1><div class="m">Access fee: <b>₱100</b> · isang beses lang · 1 device lang</div></div>
+
+<div id="rv" class="c h"><b>⭐ Sabi ng mga bumili</b><div id="rl"></div></div>
+
+<div id="buy">
+<div class="c"><b>1. I-scan at magbayad ng ₱100</b>
+<p class="m">GoTyme / InstaPay — kahit anong bank o e-wallet na may InstaPay.</p><img src="IMG_4508.jpeg" alt="GoTyme QR"></div>
+<div class="c"><b>2. Ilagay ang detalye ng bayad</b>
+<input id="n" placeholder="Pangalan"><input id="ct" placeholder="Email o Messenger/Viber/Number">
+<input id="rf" placeholder="Reference no. ng transfer"><button onclick="send()">Isumite ang Payment</button><div id="er" class="e"></div></div>
+</div>
+
+<div id="wait" class="c h"><b>⏳ Hinihintay ang confirmation</b>
+<p class="m">Chine-check ng seller ang bayad mo. Iwanang bukas ang page na ito — awtomatiko itong mag-a-update.</p></div>
+
+<div id="ok" class="c h"><b>✅ Confirmed na ang payment!</b>
+<p class="m">Ito ang access key mo. I-save mo ito. Magagamit lang ito sa <b>isang device</b>.</p>
+<div class="k" id="kk"></div><button onclick="enter(document.getElementById('kk').textContent)">Buksan ang Study Area</button></div>
+
+<div id="rej" class="c h e">Hindi na-confirm ang payment. Makipag-ugnayan sa seller.</div>
+
+<div class="c"><b>May key na ako</b><input id="ki" placeholder="XXXX-XXXX-XXXX" autocapitalize="characters">
+<button onclick="enter(document.getElementById('ki').value)">Pumasok</button><div id="er2" class="e"></div></div>
+</div>
+<script>
+const $=i=>document.getElementById(i),L=localStorage;
+let dev=L.getItem("dev");if(!dev){dev=crypto.randomUUID()+crypto.randomUUID();L.setItem("dev",dev)}
+async function enter(k,auto){k=(k||"").trim().toUpperCase();if(!k)return;
+ const r=await fetch("/api/study",{method:"POST",body:JSON.stringify({key:k,device:dev})});
+ if(!r.ok){const e=await r.json().catch(()=>({}));if(auto){L.removeItem("key")}$("er2").textContent=e.error||"Error";return}
+ L.setItem("key",k);const h=await r.text();document.open();document.write(h);document.close()}
+async function send(){$("er").textContent="";
+ const r=await fetch("/api/request",{method:"POST",body:JSON.stringify({name:$("n").value,contact:$("ct").value,ref:$("rf").value})});
+ const d=await r.json();if(!r.ok){$("er").textContent=d.error;return}L.setItem("rid",d.id);poll()}
+async function poll(){const id=L.getItem("rid");if(!id)return;$("buy").classList.add("h");
+ const d=await(await fetch("/api/status?id="+id)).json();
+ if(d.status==="approved"){$("wait").classList.add("h");$("ok").classList.remove("h");$("kk").textContent=d.key;return}
+ if(d.status==="rejected"){$("wait").classList.add("h");$("rej").classList.remove("h");return}
+ if(d.status==="unknown"){L.removeItem("rid");$("buy").classList.remove("h");return}
+ $("wait").classList.remove("h");setTimeout(poll,5000)}
+async function reviews(){try{const d=await(await fetch("/api/reviews")).json();if(!d.length)return;
+ const l=$("rl");d.forEach(v=>{const e=document.createElement("div");e.style.cssText="margin-top:12px;padding-top:10px;border-top:1px solid #8884";
+ const s=document.createElement("div");s.style.color="#f5a623";s.textContent="★".repeat(v.rating)+"☆".repeat(5-v.rating);
+ const t=document.createElement("div");t.textContent=v.text;const n=document.createElement("div");n.className="m";n.textContent="— "+v.name;
+ e.append(s,t,n);l.append(e)});$("rv").classList.remove("h")}catch(e){}}
+reviews();
+if(L.getItem("key"))enter(L.getItem("key"),true);poll();
+</script></body></html>
