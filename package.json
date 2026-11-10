@@ -1,1 +1,1 @@
-
+{ "name": "n5-study-gate", "private": true, "dependencies": { "@netlify/blobs": "^8.1.0" } }
